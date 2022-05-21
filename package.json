@@ -1,0 +1,48 @@
+{
+    "name": "apk",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "scripts": {
+        "start": "nodemon server.js"
+    },
+    "author": "Abdulrehman",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^0.24.0",
+        "bcryptjs": "^2.4.3",
+        "body-parser": "^1.19.0",
+        "cookie-parser": "^1.4.5",
+        "cors": "^2.8.5",
+        "deep-email-validator": "^0.1.18",
+        "dotenv": "^8.6.0",
+        "email-verify": "^0.2.1",
+        "express": "^4.17.1",
+        "express-handlebars": "^5.3.2",
+        "express-mongo-sanitize": "^2.0.2",
+        "fs": "0.0.1-security",
+        "google-auth-library": "^7.6.1",
+        "googleapis": "^84.0.0",
+        "handlebars": "^4.7.7",
+        "helmet": "^4.6.0",
+        "html-to-text": "^7.1.1",
+        "https": "^1.0.0",
+        "js-base64": "^3.6.1",
+        "jsonwebtoken": "^8.5.1",
+        "moment": "^2.29.1",
+        "mongoose": "^5.13.2",
+        "multer": "^1.4.2",
+        "nodemailer": "^6.6.2",
+        "nodemailer-sendgrid": "^1.0.3",
+        "path": "^0.12.7",
+        "slugify": "^1.5.0",
+        "validator": "^13.6.0",
+        "xss-clean": "^0.1.1"
+    },
+    "devDependencies": {
+        "eslint": "^7.25.0",
+        "eslint-plugin-react": "^7.23.2",
+        "morgan": "^1.10.0",
+        "nodemon": "^2.0.12"
+    }
+}

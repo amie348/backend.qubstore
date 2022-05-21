@@ -1,0 +1,24 @@
+.row{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;  
+}
+
+.btn-group {
+    padding: 1rem 0;
+  }
+  
+.Button {
+    background-color: #fff;
+    border: 1px solid #000;
+    margin-top: 0.5rem;
+    border-radius: 3px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+  
+.Button:hover {
+    cursor: pointer;
+    background-color: #000;
+    color: #fff;
+  }
