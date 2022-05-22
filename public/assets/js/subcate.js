@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-let url = "http://localhost:4000";
-// let url='http://localhost:4000';
+let url = "https://qubstore-backend.herokuapp.com";
+// let url='https://qubstore-backend.herokuapp.com';
 
 const params = new URLSearchParams(window.location.search);
 const cate = params.get("cate");

@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-// var url = "http://localhost:4000"
-var url = "http://localhost:4000"
+// var url = "https://qubstore-backend.herokuapp.com"
+var url = "https://qubstore-backend.herokuapp.com"
 
 const params = new URLSearchParams(window.location.search);
 const apkTitle = params.get("title");

@@ -1,5 +1,5 @@
-// let url = "http://localhost:4000";
-let url = "http://localhost:4000"
+// let url = "https://qubstore-backend.herokuapp.com";
+let url = "https://qubstore-backend.herokuapp.com"
 
 
 const visitors = async () => {

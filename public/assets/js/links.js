@@ -1,5 +1,5 @@
 
-let Url = "http://localhost:4000";
+let Url = "https://qubstore-backend.herokuapp.com";
 var apks = [];
 var requiredApk = [];
 
