@@ -9,7 +9,7 @@ const path = require('path')
 const hbr = require("handlebars");
 const cors = require('cors');
 const cookie = require("cookie-parser");
-const morgan = require("morgan");
+// const morgan = require("morgan");
 // 
 
 app.use((req, res, next) => {
@@ -33,7 +33,7 @@ app.engine(
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cookie());
 
