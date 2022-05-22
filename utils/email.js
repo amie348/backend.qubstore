@@ -1,12 +1,22 @@
 const nodemailer = require('nodemailer');
-const nodemailerSendgrid = require(`nodemailer-sendgrid`);
-const {sendGridApiKey} = require(`./credentials.js`);
+const {google} = require('googleapis')
+const {OAuth2} = google.auth;
+const OAUTH_PLAYGROUND = 'https://developers.google.com/oauthplayground'
+const {sendGridApiKey, googleAppRefreshToken, googleAppClientId, googleAppClientSecret, senderEmail} = require(`./credentials.js`);
+
+const oauth2Client = new OAuth2 (
+    googleAppClientId,
+    googleAppClientSecret,
+    googleAppRefreshToken,
+    OAUTH_PLAYGROUND
+  )
+
 module.exports = class Email {
     constructor(user, url, title, code) {
         this.to = user.email;
         this.firstName = user.name.split(' ')[0];
         this.url = url;
-        this.from = `QubStore <info@qubstore.com>`;
+        this.from = `Qubstore <${senderEmail}>`;
         this.title = title;
         this.code = code
     }
@@ -243,12 +253,22 @@ module.exports = class Email {
     }
 
     async newTransport() {
-        
-        return nodemailer.createTransport(            
-            nodemailerSendgrid({
-                apiKey: sendGridApiKey
-            })
-        );
+        oauth2Client.setCredentials({
+            refresh_token :  googleAppRefreshToken
+        })
+        const accessToken = oauth2Client.getAccessToken();
+        return nodemailer.createTransport({
+
+            service: "gmail",
+            auth: {
+                type : "OAuth2",
+                user : senderEmail,
+                clientId:  googleAppClientId,
+                clientSecret:  googleAppClientSecret,
+                refreshToken :  googleAppRefreshToken,
+                accessToken
+            }
+        });
 
     }
 
@@ -309,9 +329,3 @@ module.exports = class Email {
     }
 
 };
-
-
-
-// nodemailerSendgrid({
-//     apiKey: `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`
-// })
