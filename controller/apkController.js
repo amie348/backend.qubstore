@@ -909,7 +909,7 @@ exports.sendDownloadLink = async (req, res) => {
           expiresIn: process.env.JWT_EXPIRE_IN,
         }
       );
-      downloadUrl = `http://localhost:5000/productdetail.html?apkId=${apkId}&token=${expireToken}`
+      downloadUrl = `https://qubstore.com/productdetail.html?apkId=${apkId}&token=${expireToken}`
     }
     else {
       let expireToken = jwt.sign(
@@ -923,7 +923,7 @@ exports.sendDownloadLink = async (req, res) => {
           expiresIn: process.env.JWT_EXPIRE_IN,
         }
       );
-      downloadUrl = `http://localhost:5000/productdetail.html?apkId=${apkId}&token=${expireToken}`
+      downloadUrl = `https://qubstore.com/productdetail.html?apkId=${apkId}&token=${expireToken}`
     }
 
     const apk = await Apk.findOne({ _id: apkId });
