@@ -32,6 +32,7 @@ Router.post("/sendDownloadLink/:apkId", apkController.sendDownloadLink)
 // Router.use(authController.protect);
 Router.get("/oneapk/:title", protect, apkController.getOneApk);
 Router.get("/get/apks", protect, apkController.products);
+Router.post("/get/apks",protect, apkController.getApks);
 Router.post("/addApk", protect, apkController.uploadImage, apkController.addApk);
 Router.post("/get-reviews/:apkId", apkController.getReviews)
 
