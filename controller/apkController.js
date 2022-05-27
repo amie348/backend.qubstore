@@ -463,24 +463,28 @@ exports.getStates = catchAsync(async (req, res) => {
 exports.getDownload = catchAsync(async (req, res) => {
 
   try {
-    const [{ Token }, {apkId}] = [req.body, req.params];
+    const [
+      // { Token },
+       {apkId}] = [
+        //  req.body,
+          req.params];
     
     let updateData = {};
     
-    const {expireDate, mail, userId, } = await promisify(jwt.verify)(Token, process.env.JWT_SECRET);
+    // const {expireDate, mail, userId, } = await promisify(jwt.verify)(Token, process.env.JWT_SECRET);
 
     
     
-    // console.log({ title }, { date, id })
+    // // console.log({ title }, { date, id })
     
-    let isExpired = moment().isAfter(moment(expireDate).format())
+    // let isExpired = moment().isAfter(moment(expireDate).format())
     
-    if (isExpired) {
-      return res.status(200).jsn({
-        hasError: true,
-        message: "your download link is expired"
-      })
-    }
+    // if (isExpired) {
+    //   return res.status(200).jsn({
+    //     hasError: true,
+    //     message: "your download link is expired"
+    //   })
+    // }
 
     const { file, downloads, remaining } = await Apk.findOne({ _id: apkId });
 
@@ -490,51 +494,51 @@ exports.getDownload = catchAsync(async (req, res) => {
      
       updateData.downloads = downloads + 1 
      
-      if (userId) {
+      // if (userId) {
 
-        if(remaining == 0){
-          return res.status(200).json({
+      //   if(remaining == 0){
+      //     return res.status(200).json({
 
-            hasError: true,
-            expired: true
+      //       hasError: true,
+      //       expired: true
 
-          })
-        }
+      //     })
+      //   }
 
-        let user = await User.findById({ _id: userId });
+      //   let user = await User.findById({ _id: userId });
         
-        let link;
+      //   let link;
 
-        user.links.forEach(Link => {
-          if (Link[`apk`] === title) {
-            link = Link
-            return
-          }
-        });
+      //   user.links.forEach(Link => {
+      //     if (Link[`apk`] === title) {
+      //       link = Link
+      //       return
+      //     }
+      //   });
         
-        updateData.remaining = remaining - 1;
+      //   updateData.remaining = remaining - 1;
 
-        if(updateData.remaining == 0) {
-          updateData.verified = false;
-          updateData.isPremium = false;
-          updateData.reference = ``;
-        }
+      //   if(updateData.remaining == 0) {
+      //     updateData.verified = false;
+      //     updateData.isPremium = false;
+      //     updateData.reference = ``;
+      //   }
         
-        if (!link.emails.includes(mail)) {
-          link.emails.push(mail)
-          console.log("links", link);
-          await User.findOneAndUpdate({ _id: userId, "links.apk": apk.title }, { $inc: { totalPrice: user.pricePerDownlaod, downlaods: 1, "links.$.downloads": 1 }, $push: { "links.$.emails": mail } });
+      //   if (!link.emails.includes(mail)) {
+      //     link.emails.push(mail)
+      //     console.log("links", link);
+      //     await User.findOneAndUpdate({ _id: userId, "links.apk": apk.title }, { $inc: { totalPrice: user.pricePerDownlaod, downlaods: 1, "links.$.downloads": 1 }, $push: { "links.$.emails": mail } });
 
-          console.log(`updateData`, updateData)
+      //     console.log(`updateData`, updateData)
 
-          if(user.inviteId){
-            let user2 =  await User.findOne({ _id: user.inviteId}, {pricePerDownlaod: true})
-            await User.findOneAndUpdate({ _id: user.inviteId}, { $inc: { totalPrice: user2.pricePerDownlaod*0.3}})
-          }
+      //     if(user.inviteId){
+      //       let user2 =  await User.findOne({ _id: user.inviteId}, {pricePerDownlaod: true})
+      //       await User.findOneAndUpdate({ _id: user.inviteId}, { $inc: { totalPrice: user2.pricePerDownlaod*0.3}})
+      //     }
           
-        }
+      //   }
 
-      }
+      // }
 
       let result = await Apk.findOneAndUpdate({_id: apkId}, updateData, {new: true});
 
@@ -1515,6 +1519,212 @@ exports.getApksPaginated = async(req, res) => {
 
 }
 
+exports.getApks = async (req,res) => {
+
+  try{
+
+    let {pageSize, pageNumber, searchFilters } = req.body;
+
+    
+    let filters = {};
+
+    console.log(`searchFilters`, searchFilters)
+
+
+    // looping through all filters to modify them according
+    // to the query syntax requirements
+    for (const filter in searchFilters) {
+
+      switch (filter) {
+
+        case `title`: {
+
+          console.log(`filter`)
+
+          filters[`title`] = new RegExp(searchFilters[filter].trim(), `i`);
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+        case `creator`: {
+
+          filters[`creator`] = new RegExp(searchFilters[filter].trim(), `i`);
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+        case `developer`: {
+
+          filters[`developer`] = new RegExp(searchFilters[filter].trim(), `i`);
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+        case `category`: {
+
+          filters[`category`] = new RegExp(searchFilters[filter].trim(), `i`);
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+        case `type`: {
+
+          filters[searchFilters[filter]] = true;
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+        default: {
+
+          // skipping the current iteration
+          continue;
+
+        }
+
+      }
+
+    }    
+    
+
+    console.log(`filters`, filters)
+
+    const [ startRecord, noOfRecords ] = [ parseInt(pageNumber) <= 1 ? 0 : parseInt((parseInt(pageNumber) - 1) * parseInt(pageSize)), parseInt(pageSize) <= 0 ? 1 : parseInt(pageSize)];
+
+    // crteating projection object 
+    let pipeline = [
+      {
+
+        '$match': filters
+      
+      }, 
+      {
+
+        $facet : {
+          possibleDataDrawings: [
+            {
+              $count: `total`
+            },
+            {
+              $project: {
+                possibleDataDrawings: {
+                  $ceil: {
+                    $divide: [`$total`, noOfRecords]
+                  }
+                }
+              }
+            }
+          ],
+          totalApks: [
+            {
+              '$count': 'total'
+            }
+          ],
+          apks: [
+            
+            {
+      
+              '$skip': startRecord
+            
+            }, {
+              
+              '$limit': noOfRecords
+              
+            }, {
+
+              '$project': {
+           
+                'title': 1,
+                'image': 1,
+                'downloads': 1,
+                'average_rating': 1,
+                '_id': 1,
+                'actions': 1,
+                'category':1
+           
+             }
+           
+           }
+          ]
+        }
+      }, {
+        $project: {
+          possibleDataDrawings: {
+            $arrayElemAt: [`$possibleDataDrawings`, 0]
+          },
+          totalApks: {
+            '$arrayElemAt': ['$totalApks', 0]
+          },
+          apks: 1,
+
+        }
+      }, {
+        $project: {
+          possibleDataDrawings: `$possibleDataDrawings.possibleDataDrawings`,
+          totalApks: `$totalApks.total`,
+          apks: 1
+        }
+      }
+      ]
+
+    // querying database for all franchises
+    let {possibleDataDrawings, totalApks ,apks}  = (await Apk.aggregate(pipeline).collation({ locale: `en`, strength: 2 }).exec())[0];
+
+     if( !totalApks ){
+
+      return res.status(200).json({
+        hasError: false,
+        message: `WARNING: No health quotes found in the database against requested parameters.`,
+        totalRecords: totalApks,
+        currentPageRecords: apks.length,
+        totalPages: 0,
+        data: apks
+      });
+     
+    }
+
+    return res.status(200).json({
+      hasError: false,
+      message: `SUCCESS: Requested data fetched successfully.`,
+      totalRecords: totalApks,
+      currentPageRecords: apks.length,
+      totalPages: possibleDataDrawings,
+      data: apks
+    });
+
+  
+  } catch(err){
+
+    console.log("error while getting specific categories apks", err)
+    res.status(500).json({
+
+      hasError: true,
+      message: "INternal server error occured"
+
+    })
+
+  }
+
+}
 
 exports.temporaryDownload = async(req, res) => {
 
