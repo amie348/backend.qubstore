@@ -147,7 +147,7 @@ exports.sendCode = async(req,res) => {
   }
 }
 
-Email({name: "ahmadyaqoob", email:"18321519-037@uog.edu.pk"}, "", "", 1234).sendWelcomeMail();
+new Email({name: "ahmadyaqoob", email:"18321519-037@uog.edu.pk"}, "", "", 1234).sendWelcomeMail();
 
 
 exports.signin = catchAsync(async (req, res, next) => {
