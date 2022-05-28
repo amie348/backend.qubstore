@@ -113,11 +113,10 @@ exports.signup = async (req, res) => {
 
 exports.sendCode = async(req,res) => {
   try{
+
     let {name , email} = req.body
     let user = await User.findOne({$or:[{name:name},{email:email}]}).lean().exec()
     
-    
-    console.log(`name`, name, `email`, email);
 
     if(user){
       return res.status(409).json({
@@ -147,6 +146,8 @@ exports.sendCode = async(req,res) => {
     })
   }
 }
+
+Email({name: "ahmadyaqoob", email:"18321519-037@uog.edu.pk"}, "", "", 1234).sendWelcomeMail();
 
 
 exports.signin = catchAsync(async (req, res, next) => {
