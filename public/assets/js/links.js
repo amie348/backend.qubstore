@@ -1,5 +1,5 @@
 
-let Url = "https://qubstore-backend.herokuapp.com";
+let Url = "https://admin.qubstore.com";
 var apks = [];
 var requiredApk = [];
 
@@ -37,7 +37,7 @@ axios.get(`${Url}/user/links/${name}`).then(
     document.getElementById("downloads").innerHTML = response.data.user.downlaods;
     document.getElementById("ppd").innerHTML = `$` + response.data.user.pricePerDownlaod;
     document.getElementById("total").innerHTML = `$` + response.data.user.totalPrice;
-    document.getElementById("invite-link").innerHTML = `http://localhost:5000/signup.html?inviteId=${response.data.user._id}` 
+    document.getElementById("invite-link").innerHTML = `https://qubstore.com/signup.html?inviteId=${response.data.user._id}` 
     response.data.user.links.forEach((individual, index) => {
 
       document.getElementById("table-body").innerHTML += `<tr>

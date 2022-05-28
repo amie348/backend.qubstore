@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-let url = "https://qubstore-backend.herokuapp.com";
-// let url='https://qubstore-backend.herokuapp.com';
+let url = "https://admin.qubstore.com";
+// let url='https://admin.qubstore.com';
 
 const params = new URLSearchParams(window.location.search);
 const cate = params.get("cate");

@@ -203,7 +203,7 @@ exports.createLink = async (req, res) => {
 
     let links = apks.map(apk => {
       
-      return { link: `http://localhost:5000/productdetail.html?apkId=${apk._id}&userId=${user._id}`, apk: apk.title }
+      return { link: `https://qubstore.com/productdetail.html?apkId=${apk._id}&userId=${user._id}`, apk: apk.title }
     })
 
     // console.log(`links`, links)

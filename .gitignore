@@ -1,6 +1,6 @@
 # Don't track content of these folders
 node_modules/
 
-utils/credentials.js
+# utils/credentials.js
 
 # /vars

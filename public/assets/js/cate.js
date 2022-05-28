@@ -1,8 +1,8 @@
 /* eslint-disable no-undef */
 const params = new URLSearchParams(window.location.search);
 const cate = params.get("cate");
-// let url = "https://qubstore-backend.herokuapp.com";
-let url = 'https://qubstore-backend.herokuapp.com';
+// let url = "https://admin.qubstore.com";
+let url = 'https://admin.qubstore.com';
 const addCates = document.getElementById('c_button');
 if (addCates) {
   addCates.addEventListener('click', (e) => {

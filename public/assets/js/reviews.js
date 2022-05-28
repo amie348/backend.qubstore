@@ -1,6 +1,6 @@
 
-let Url = "https://qubstore-backend.herokuapp.com";
-// let Url = "https://qubstore-backend.herokuapp.com"
+let Url = "https://admin.qubstore.com";
+// let Url = "https://admin.qubstore.com"
 
 
 

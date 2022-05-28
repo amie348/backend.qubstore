@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 const params = new URLSearchParams(window.location.search);
-// var url = "https://qubstore-backend.herokuapp.com"
-var url = "https://qubstore-backend.herokuapp.com"
+// var url = "https://admin.qubstore.com"
+var url = "https://admin.qubstore.com"
 
 
 // var urls = new URL(window.location.href);

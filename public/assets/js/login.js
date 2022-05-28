@@ -1,8 +1,8 @@
 /* eslint-disable no-undef */
 const params = new URLSearchParams(window.location.search);
 const apkTitle = params.get("title");
-let url = "https://qubstore-backend.herokuapp.com";
-// let url='https://qubstore-backend.herokuapp.com';
+let url = "https://admin.qubstore.com";
+// let url='https://admin.qubstore.com';
 let g_category;
 let files = []; //This is multiple images
 let g_subCategory;

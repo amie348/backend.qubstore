@@ -18,10 +18,10 @@ mongoose
         useFindAndModify: false,
     }).then(() => {
         console.log("database connection successful...!!!");
+        app.listen(port, () => {
+            console.log(`App listening at :${port}`)
+        });
     }).catch(console.log);
-        
  
-app.listen(port, () => {
-    console.log(`App listening at :${port}`)
-});
+
 

@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-// var url = "https://qubstore-backend.herokuapp.com"
-var url = "https://qubstore-backend.herokuapp.com"
+// var url = "https://admin.qubstore.com"
+var url = "https://admin.qubstore.com"
 
 const params = new URLSearchParams(window.location.search);
 const apkTitle = params.get("title");

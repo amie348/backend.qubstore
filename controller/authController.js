@@ -232,9 +232,6 @@ exports.protect = catchAsync(async (req, res, next) => {
   
 
 
-  // Access granted to the next rout
-  // see blew function where req.user used
-  console.log(`currentUser`, currentUser)
   
   req.user = currentUser;
   
