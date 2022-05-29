@@ -58,22 +58,24 @@ exports.signup = async (req, res) => {
 
   try{
 
-    let {name, email, inviteId, password, passwordConfirm, code, codeId} = req.body;
+    let {name, email, inviteId, password, passwordConfirm
+      // , code, codeId
+    } = req.body;
 
-    const result = await Verification.findOne({_id: codeId, code:code});
+    // const result = await Verification.findOne({_id: codeId, code:code});
 
-    if(!result){
+    // if(!result){
 
-      console.log("verification code is not correct");
+    //   console.log("verification code is not correct");
 
-      return res.status(401).json({
+    //   return res.status(401).json({
 
-        hasError: true,
-        message: `verification code is not correct`
+    //     hasError: true,
+    //     message: `verification code is not correct`
 
-      });
+    //   });
 
-    }
+    // }
 
     const newUser = await User.create({
       // role: req.body.role,
