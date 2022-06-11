@@ -7,8 +7,10 @@ const jwt = require("jsonwebtoken");
 const Email = require("../utils/email");
 const emailVerifier = require("email-verify")
 const bcrypt = require(`bcryptjs`);
-
-//await new Email(newUser, "", "").sendWelcomeMail();
+const readXlsxFile = require(`read-excel-file`);
+var XLSX = require('xlsx');
+var path = require('path');
+var filePath = path.resolve(__dirname,'accounts.xlsx');
 
 
 
@@ -149,7 +151,6 @@ exports.sendCode = async(req,res) => {
   }
 }
 
-
 exports.signin = catchAsync(async (req, res, next) => {
 
   const { name, password } = req.body;
@@ -192,10 +193,11 @@ exports.signin = catchAsync(async (req, res, next) => {
 
 exports.protect = catchAsync(async (req, res, next) => {
 
-  // try{
+  
 
   let token
   if ( req.headers.authorization ) {
+
 
 
     token = req.headers.authorization
@@ -204,7 +206,8 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   } else if (req.headers.cookie) {
 
-    token = req.headers.cookie.split(" ")[2] ? req.headers.cookie.split(" ")[4].substr(4) : req.headers.cookie.substr(4);
+
+    token = req.headers.cookie.split(" ")[2] ? req.headers.cookie.split(" ")[2].substr(4) : req.headers.cookie.substr(4);
     
   } 
 
@@ -223,17 +226,6 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  // 4) check if user change the password after generating token
-  // if (currentUser.changePasswordAfter(decoded.iat)) {
-  //   return next(
-  //     new AppError("User recently change password please login again", 401)
-  //   );
-  // }
-
-  
-
-
-  
   req.user = currentUser;
   
   res.locals.user = currentUser;
@@ -479,3 +471,70 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // update changePasswordAt property for user
   // login the user with JWT
 });
+
+
+exports.feedAllUsers = async() => {
+
+  
+  // readXlsxFile(`./accountss.xlsx`).then((rows) => {
+
+  //   console.log(`rows`, rows)
+  
+  //   }).catch(error => {
+
+  //     console.log(error)
+
+  //   })
+
+
+  let account = {};
+  let accounts = [];
+
+  try{
+
+    // console.log(`filePath`, filePath)
+
+    var workbook = XLSX.readFile(filePath);
+    const workSheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    for (cell in workSheet){
+
+      const cellValue =  cell.toString();
+
+
+      if(workSheet[cellValue].v)
+        {
+          if(cellValue[0] === `A`){
+            account.username = workSheet[cell].v;
+          }
+          if(cellValue[0] === `B`){
+            account.email = workSheet[cell].v;
+            accounts.push(account);
+            console.log(`account`, account,)
+            console.log(`cellValue`, cellValue)
+            const newUser = await User.create({
+            
+              name: account.username,
+              email: account.email,
+              password: account.email,
+              passwordConfirm: account.email
+  
+            });
+            account = {};   
+
+          }
+          
+          
+        }
+    }
+
+
+
+  }catch(error){
+
+    console.log(`error`, error)
+
+  }
+  
+}
+

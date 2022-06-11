@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 const params = new URLSearchParams(window.location.search);
 const apkTitle = params.get("title");
-let url = "https://admin.qubstore.com";
+let url = "http://localhost:4000";
 // let url='https://admin.qubstore.com';
 let g_category;
 let files = []; //This is multiple images
@@ -214,6 +214,7 @@ const addApk = async () => {
   const version = document.getElementById("version").value;
   const description = document.getElementById("description").value;
   const image = document.getElementById("image").files[0];
+  console.log(`image`, image)
   const title = document.getElementById("title").value;
   const requirements = document.getElementById("requirements").value;
   const tags = document.getElementById("tags").value;
@@ -283,6 +284,7 @@ const addApk = async () => {
     }
 
     // Adding apk
+    console.log(`formData`, formData.values())
     const rs1 = await axios.post(`${url}/apk/addApk`, formData);
     console.log("rs1", { rs1 });
     const fd = new FormData();
@@ -290,20 +292,22 @@ const addApk = async () => {
     for (let x = 0; x < ins; x++) {
       fd.append("images", files[x]);
     }
-    const rs2 = await axios.patch(
-      `${url}/apk/addApkImages/${title}`,
-      fd,
-      configImages
-    );
+    console.log(`fd`, fd)
+    // const rs2 = await axios.patch(
+    //   `${url}/apk/addApkImages/${title}`,
+    //   fd,
+    //   configImages
+    // );
     console.log("res2", { rs2 });
     const fileData = new FormData();
     fileData.append("file", file);
-    const rs3 = await axios.patch(
-      `${url}/apk/addApkFile/${title}`,
-      fileData,
-      configApk
-    );
-    console.log("res3", { rs3 });
+    console.log(`fileData`, fileData)
+    // const rs3 = await axios.patch(
+    //   `${url}/apk/addApkFile/${title}`,
+    //   fileData,
+    //   configApk
+    // );
+    // console.log("res3", { rs3 });
 
     // console.log({result,datas});
     window.location = "/products";
@@ -500,7 +504,6 @@ const editApks = async () => {
   const title = document.getElementById("title").value;
   const requirements = document.getElementById("requirements").value;
   const tags = document.getElementById("tags").value;
-  console.log({ img: image });
   const formData = new FormData();
   formData.append("title", title);
   formData.append("category", g_category);

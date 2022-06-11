@@ -186,7 +186,11 @@ exports.updateApk = catchAsync(async (req, res) => {
 });
 
 exports.addApk = catchAsync(async (req, res, next) => {
-  // console.log({ body: req.body, image: req.file });
+  
+  console.log({ body: req.body, image: req.file });
+
+  // console.log(req.body)
+
   const user = req.user;
   const actions = user.role == 'admin' ? 'approved' : 'pending';
   const hot = req.body.hot == "true";
@@ -230,6 +234,7 @@ exports.addApk = catchAsync(async (req, res, next) => {
   res.status(201).json({
     data: apk,
   });
+
 });
 
 exports.getAllApk = catchAsync(async (req, res) => {
@@ -640,22 +645,17 @@ exports.addComment = async (req, res) => {
     });
 
     
-  console.log(`apk.Rating_count`, apk.Rating_count)
 
   let total_reviews = apk.Rating_count.one + apk.Rating_count.two + apk.Rating_count.three + apk.Rating_count.four + apk.Rating_count.five
-
-  console.log(`total_reviews`, total_reviews);
 
   let average_rating = 0;
 
   let total_rating = apk.Rating_count.one + apk.Rating_count.two*2 + apk.Rating_count.three*3 + apk.Rating_count.four*4 + apk.Rating_count.five*5 
 
-  console.log(`total_rating`, total_rating);
-
   average_rating = total_rating / total_reviews;
-  console.log(`average_rating`, average_rating)
+  
   average_rating = Math.round((average_rating + Number.EPSILON) * 100) / 100
-  console.log(`average_rating`, average_rating)
+  
 
   const result = Apk.findOneAndUpdate({_id: apkId}, { average_rating: average_rating ? average_rating: 0  }).lean().exec();
 
@@ -1760,5 +1760,114 @@ exports.temporaryDownload = async(req, res) => {
 
 }
 
-/*
-*/
+
+// const randomNumbers = (min, max) => {
+// 	return Math.round(Math.random() * (max - min)) + min;
+// }
+
+
+// const comments = [`very nice app`,  `great application`, `I Like this application`, `It has helped me alot. thank you`, `overall perfect application`];
+
+// const ratingss = [5, 5, 5, 5, 5, 4, 5, 4, 5, 5];
+
+// const apkIds = [
+// // "628e384cfe601d805825259d",
+// // "628e477bfe601d80582525e1",
+// // "628e4c65fe601d8058252617",
+// // "628e5072fe601d8058252636",
+// // "628e533dfe601d8058252661",
+// // "628e56eefe601d805825267f",
+// // "628e5c27fe601d80582526b1",
+// // "628e5ddbfe601d80582526c1",
+// // "628e5f63fe601d80582526e0",
+// // "628e60aafe601d80582526ed",
+// // "628e69eefe601d8058252710",
+// // "628e6b6afe601d805825271c",
+// // "628e6ccbfe601d8058252728",
+// // "628e6e85fe601d8058252734",
+// // "628e727efe601d805825273e",
+// // "628e7395fe601d805825274e",
+// // "628e76c8fe601d805825275e",
+// // "628e7972fe601d8058252771",
+// // "628f2a59fe601d8058252a2e" 
+// ]
+
+
+
+
+
+// exports.feedComments = async(req, res) => {
+
+
+  
+  
+  
+
+
+//   const apkId = "628f2a59fe601d8058252a2e";
+
+//     const rand = randomNumbers(500, 1500);
+
+//     console.log(rand)
+    
+//     for ( j=0; j < rand; j++ ){
+
+//       let date = new Date();
+    
+
+//       const text = comments[randomNumbers(0, 4)];
+//       const rating = ratingss[randomNumbers(0, 9)]
+
+    
+//       let param 
+//       if(rating == 4){
+//         param = `Rating_count.four`
+//       } else {
+//         param = `Rating_count.five`
+//       }
+    
+    
+//       let review = {
+//         comment: {
+//           text: text,
+//           user: Ids[randomNumbers(10, 2000)],
+//           time: date
+//         },
+//         reply: {},
+//         rating
+//       }
+    
+//     const apk = await Apk.findOneAndUpdate({ _id: apkId }, { $push: { reviews: review }, $inc: { [param]: 1 } }, { new: true }).select(`Rating_count`).lean().exec();
+    
+//     console.log(`#: ${j+1}   Comment: ${text} -  Rating :${rating} added ` );  
+    
+//       if(j == rand -1 ){
+
+//         let total_reviews = apk.Rating_count.four + apk.Rating_count.five
+    
+//         let average_rating = 0;
+        
+//         let total_rating = apk.Rating_count.four*4 + apk.Rating_count.five*5 
+        
+//         average_rating = total_rating / total_reviews;
+        
+//         average_rating = Math.round((average_rating + Number.EPSILON) * 100) / 100
+        
+        
+//         const result = Apk.findOneAndUpdate({_id: apkId}, { average_rating: average_rating ? average_rating: 0  }).lean().exec();
+
+//       }
+
+    
+
+
+//     } 
+
+    
+  
+  
+  
+
+// }
+
+

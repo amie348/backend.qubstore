@@ -5,9 +5,208 @@ const Apk = require(`../models/apkModel`)
 
 
 exports.getAllUsers = catchAsync(async (req, res) => {
+  
+  
   const users = await User.find({ active: true });
   res.status(200).json({ users });
+
+
 });
+
+exports.getUsers = async (req,res) => {
+
+  try{
+
+    let {pageSize, pageNumber, searchFilters } = req.body;
+
+    
+    let filters = {};
+
+    console.log(`searchFilters`, searchFilters)
+
+
+    // looping through all filters to modify them according
+    // to the query syntax requirements
+    for (const filter in searchFilters) {
+
+      switch (filter) {
+
+        case `name`: {
+
+          console.log(`filter`)
+
+          filters[`name`] = new RegExp(searchFilters[filter].trim(), `i`);
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+        case `email`: {
+
+          filters[`email`] = new RegExp(searchFilters[filter].trim(), `i`);
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+        case `role`: {
+
+          filters[`role`] = new RegExp(searchFilters[filter].trim(), `i`);
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+
+        case `active`: {
+
+          filters[`active`] = searchFilters[filter] === `true`;
+
+          // deleting the 'firstName' key
+          delete searchFilters[filter];
+
+          break;
+
+        }
+
+        default: {
+
+          // skipping the current iteration
+          continue;
+
+        }
+
+      }
+
+    }    
+    
+
+    console.log(`filters`, filters)
+
+    const [ startRecord, noOfRecords ] = [ parseInt(pageNumber) <= 1 ? 0 : parseInt((parseInt(pageNumber) - 1) * parseInt(pageSize)), parseInt(pageSize) <= 0 ? 1 : parseInt(pageSize)];
+
+    // crteating projection object 
+    let pipeline = [
+      {
+
+        '$match': filters
+      
+      }, 
+      {
+
+        $facet : {
+          possibleDataDrawings: [
+            {
+              $count: `total`
+            },
+            {
+              $project: {
+                possibleDataDrawings: {
+                  $ceil: {
+                    $divide: [`$total`, noOfRecords]
+                  }
+                }
+              }
+            }
+          ],
+          totalUsers: [
+            {
+              '$count': 'total'
+            }
+          ],
+          users: [
+            
+            {
+      
+              '$skip': startRecord
+            
+            }, {
+              
+              '$limit': noOfRecords
+              
+            }, {
+
+              '$project': {
+           
+                'name': 1,
+                'email': 1,
+                'role': 1,
+                'active': 1,
+                '_id': 1,
+           
+             }
+           
+           }
+          ]
+        }
+      }, {
+        $project: {
+          possibleDataDrawings: {
+            $arrayElemAt: [`$possibleDataDrawings`, 0]
+          },
+          totalUsers: {
+            '$arrayElemAt': ['$totalUsers', 0]
+          },
+          users: 1,
+
+        }
+      }, {
+        $project: {
+          possibleDataDrawings: `$possibleDataDrawings.possibleDataDrawings`,
+          totalUsers: `$totalUsers.total`,
+          users: 1
+        }
+      }
+      ]
+
+    // querying database for all franchises
+    let {possibleDataDrawings, totalUsers ,users}  = (await User.aggregate(pipeline).collation({ locale: `en`, strength: 2 }).exec())[0];
+
+     if( !totalUsers ){
+
+      return res.status(200).json({
+        hasError: false,
+        message: `No Users found in the database against requested parameters.`,
+        totalRecords: totalUsers,
+        currentPageRecords: users.length,
+        totalPages: 0,
+        data: users
+      });
+     
+    }
+
+    return res.status(200).json({
+      hasError: false,
+      message: `SUCCESS: Requested data fetched successfully.`,
+      totalRecords: totalUsers,
+      currentPageRecords: users.length,
+      totalPages: possibleDataDrawings,
+      data: users
+    });
+
+  
+  } catch(err){
+
+    console.log("error while getting specific categories apks", err)
+    res.status(500).json({
+
+      hasError: true,
+      message: "INternal server error occured"
+
+    })
+
+  }
+
+}
 
 exports.deleteUser = catchAsync(async (req, res, next) => {
   const doc = await User.findOneAndDelete(
@@ -19,6 +218,46 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
     message: "success",
   });
 });
+
+exports.deleteUserById = async (req, res) => {
+
+  try{
+
+    const {userId} =  req.params;
+    
+
+    let result = await User.findByIdAndDelete({_id: userId});
+  
+    console.log(`result`, result);
+
+    if(!result){
+      
+      return res.status(400).json({
+      
+        hasError: true,
+        message: "user deletion failed"
+  
+      });
+
+    }
+
+    return res.status(200).json({
+      
+      hasError: false,
+      message: "user deleted successfully"
+
+    });
+  
+  }catch(err){
+
+    return res.status(500).json({
+      hasError: true,
+      message: "Internal server error occured"
+    });
+
+  }  
+
+}
 
 exports.getMe = catchAsync(async (req, res, next) => {
   
@@ -49,6 +288,7 @@ const filter = (obj, ...fields) => {
   });
   return newObj;
 };
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   // console.log(req.file);
   // console.log(req.body);
@@ -128,6 +368,44 @@ exports.update = catchAsync(async (req, res, next) => {
 
   }
 });
+
+exports.updateStatus  =  async (req, res) => {
+
+  try{
+
+    const [{ active }, {userId}] = [req.body, req.params];
+    
+
+    let updatedUser = await User.findByIdAndUpdate({_id: userId}, {active : active === "true"}, { new: true, runValidators: true });
+  
+    if(!updatedUser){
+      
+      return res.status(400).json({
+      
+        hasError: true,
+        message: "user updation failed"
+  
+      });
+
+    }
+
+    return res.status(200).json({
+      
+      hasError: false,
+      message: "user updated successfully"
+
+    });
+  
+  }catch(err){
+
+    return res.status(500).json({
+      hasError: true,
+      message: "Internal server error occured"
+    });
+
+  }
+
+}
 
 exports.getLinks = async (req, res) => {
   

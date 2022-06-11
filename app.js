@@ -9,6 +9,7 @@ const path = require('path')
 const hbr = require("handlebars");
 const cors = require('cors');
 const cookie = require("cookie-parser");
+// const { feedComments } = require("./controller/apkController");
 // const morgan = require("morgan");
 // 
 
@@ -46,6 +47,9 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cookie());
 
+
+
+// app.get(`/`, feedComments);
 
 app.use("/apk", apkRouts);
 app.use("/user", userRouts);

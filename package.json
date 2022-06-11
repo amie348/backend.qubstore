@@ -36,8 +36,10 @@
         "nodemailer": "^6.6.2",
         "nodemailer-sendgrid": "^1.0.3",
         "path": "^0.12.7",
+        "read-excel-file": "^5.3.3",
         "slugify": "^1.5.0",
         "validator": "^13.6.0",
+        "xlsx": "^0.18.5",
         "xss-clean": "^0.1.1"
     },
     "devDependencies": {
