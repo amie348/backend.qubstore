@@ -9,6 +9,7 @@ const path = require('path')
 const hbr = require("handlebars");
 const cors = require('cors');
 const cookie = require("cookie-parser");
+const { additionalRouter }  = require(`./routs/additionalRouts`)
 // const { feedComments } = require("./controller/apkController");
 // const morgan = require("morgan");
 // 
@@ -54,6 +55,7 @@ app.use(cookie());
 app.use("/apk", apkRouts);
 app.use("/user", userRouts);
 app.use("/transection", transectionRouter);
+app.use(`/additional`, additionalRouter)
 app.use("/", viewRouts);
 // app.get('*',(re,res)=>{
 //   res.status(200).json({data:[{data:"rout not found"}]});
