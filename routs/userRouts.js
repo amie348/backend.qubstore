@@ -14,7 +14,7 @@ Router.get("/links", authController.protect,userController.getLinks);
 Router.post("/createLinks", authController.protect, userController.createLink);
 Router.post("/ResetPassword",authController.ChangePassword);
 Router.post("/getUsers",  authController.protect, authController.restrictTo("admin"),userController.getUsers)
-Router.patch("/update-status/:userId", authController.protect, authController.restrictTo("admin"), userController.updateStatus)
+Router.patch("/update/:userId", authController.protect, authController.restrictTo("admin"), userController.updateUser)
 Router.delete("/delete-user/:userId", authController.protect, authController.restrictTo("admin"), userController.deleteUserById)
 
 

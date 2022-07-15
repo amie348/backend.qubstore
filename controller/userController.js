@@ -327,20 +327,24 @@ exports.update = catchAsync(async (req, res, next) => {
   
   try{
 
-    const { dp, email, dob } = req.body;
-    const filterObj = {}
+    // const { dp, email, dob } = req.body;
     
-    if( dp ){
-      filterObj[`dp`] = dp 
-      console.log(`dp`, dp)
-    } else if( email ){
-      filterObj[`email`] = email
-    } else if(dob){
-      filterObj[`dob`] = dob
-    }
+    // const filterObj = {}
+    
+    // if( dp ){
+    //   filterObj[`dp`] = dp 
+    //   console.log(`dp`, dp)
+    // } else if( email ){
+    //   filterObj[`email`] = email
+    // } else if(dob){
+    //   filterObj[`dob`] = dob
+    // }
 
-    let updatedUser = await User.findByIdAndUpdate(req.user.id, filterObj, { new: true, runValidators: true });
+
+    let updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, { new: true, runValidators: true });
   
+    console.log(updatedUser)
+
     if(!updatedUser){
       
       return res.status(400).json({
@@ -369,15 +373,18 @@ exports.update = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.updateStatus  =  async (req, res) => {
+exports.updateUser = async(req, res) => {
 
   try{
 
-    const [{ active }, {userId}] = [req.body, req.params];
-    
+    const {userId} = req.params
 
-    let updatedUser = await User.findByIdAndUpdate({_id: userId}, {active : active === "true"}, { new: true, runValidators: true });
+    console.log(typeof userId, typeof req.user.id)
+
+    let updatedUser = await User.findById(userId);
   
+    console.log(updatedUser)
+
     if(!updatedUser){
       
       return res.status(400).json({
@@ -406,6 +413,49 @@ exports.updateStatus  =  async (req, res) => {
   }
 
 }
+
+exports.updateStatus  =  async (req, res) => {
+
+  try{
+
+    const [{ active }, {userId}] = [req.body, req.params];
+    
+
+    console.log({ active }, {userId})
+
+    let updatedUser = await User.findOneAndUpdate({_id: userId}, {active : active === "true"}, { new: true });
+  
+    console.log(updatedUser)
+
+    if(!updatedUser){
+      
+      return res.status(400).json({
+      
+        hasError: true,
+        message: "user updation failed"
+  
+      });
+
+    }
+
+    return res.status(200).json({
+      
+      hasError: false,
+      message: "user updated successfully"
+
+    });
+  
+  }catch(err){
+
+    return res.status(500).json({
+      hasError: true,
+      message: "Internal server error occured"
+    });
+
+  }
+
+}
+
 
 exports.getLinks = async (req, res) => {
   

@@ -3,9 +3,9 @@ const catchAsync = require("../utils/catchAsync");
 const Visitors = require("../models/visitors.Model");
 exports.addSlider = catchAsync(async (req, res) => {
   console.log(req.body);
-  const { title, link } = req.body;
+  const { title, link, active } = req.body;
   const filename = req.file.filename;
-  const slider = await Slider.create({ title, image: filename, link });
+  const slider = await Slider.create({ title, image: filename, link, active });
   res.status(201).json({
     data: slider,
   });
@@ -18,6 +18,17 @@ exports.deleteSlider = catchAsync(async (req, res) => {
     data: data,
   });
 });
+
+exports.tempDeleteSlider = catchAsync(async (req, res) => {
+  console.log(req.body);
+  const { _id } = req.params;
+  const data = await Slider.findOneAndDelete({ _id });
+  res.status(200).json({
+    data: data,
+  });
+});
+
+
 exports.getAll = catchAsync(async (req, res) => {
   const data = await Slider.find();
   res.status(200).json({
@@ -67,9 +78,25 @@ exports.getAllActive = catchAsync(async (req, res) => {
 });
 
 exports.activeSwitch = catchAsync(async (req, res) => {
-  const { title } = req.params;
-  console.log(title);
+  const { title, _id } = req.params;
+  
   const slider = await Slider.findOne({ title });
+  // console.log({actives:slider.active});
+  const status = slider.active ? false : true;
+  const sl = await Slider.findByIdAndUpdate(
+    { _id: slider._id },
+    { active: status }
+  );
+  res.status(201).json({
+    data: sl,
+  });
+});
+
+
+exports.tempActiveSwitch = catchAsync(async (req, res) => {
+  const {  _id } = req.params;
+  
+  const slider = await Slider.findOne({ _id });
   // console.log({actives:slider.active});
   const status = slider.active ? false : true;
   const sl = await Slider.findByIdAndUpdate(

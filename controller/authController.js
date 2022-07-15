@@ -194,7 +194,6 @@ exports.signin = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
 
   
-
   let token
   if ( req.headers.authorization ) {
 
@@ -206,24 +205,30 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   } else if (req.headers.cookie) {
 
-
     token = req.headers.cookie.split(" ")[2] ? req.headers.cookie.split(" ")[2].substr(4) : req.headers.cookie.substr(4);
     
   } 
 
   if(!token){
-    return next(new AppError("You are not login please login and get access", 401));
+    return res.status(401).json({
+
+      hasError: true,
+      message: "Please Login"
+
+    })
   }
   
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
- 
   let currentUser = await User.findOne({name:decoded.name});
  
   if (!currentUser){
-    return next(
-      new AppError("No user belong to this token please try again", 401)
-    );
+    return res.status(401).json({
+
+      hasError: true,
+      message: "No user Exist in database"
+
+    })
   }
 
   req.user = currentUser;

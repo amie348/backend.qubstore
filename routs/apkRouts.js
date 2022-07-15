@@ -42,7 +42,18 @@ Router.delete("/deletesubcate/:cate", protect, apkController.deleteSubcategory);
 Router.patch("/addApkImages/:title",  protect, apkController.uploadMultiImages.array("images", 10), apkController.saveImages, apkController.uploadImagesHandler);
 Router.get("/allApk", protect,apkController.getAllApk);
 // temporary for testing purpose
-Router.get(`/temporary-download/:apkId`, apkController.temporaryDownload)
+
+
+// for new admin panel
+Router.get(`/dashtics`, apkController.dashboardAnalytics);
+Router.get(`/temporary-download/:apkId`, apkController.temporaryDownload);
+Router.get("/category", protect ,restrictTo("admin"), apkController.getAllCategories);
+Router.post(`/subcategory`, protect ,restrictTo("admin"), apkController.getSubCategories)
+Router.patch("/delete/subcategory/:_categoryId", protect, apkController.tempDeleteSubcategory);
+Router.patch("/add/SubCategory/:_categoryId", protect, restrictTo("admin"),apkController.uploadImage, apkController.tempAddSubCategory);
+
+
+
 
 
 
@@ -56,6 +67,14 @@ Router.post("/allsliders", protect ,restrictTo("admin") ,sliderController.getAll
 Router.post("/addSlider", protect, restrictTo("admin") ,apkController.uploadImage, sliderController.addSlider);
 Router.delete("/deleteSlider", protect,restrictTo("admin"), sliderController.deleteSlider);
 Router.patch("/activeSwitch/:title", protect,restrictTo("admin"), sliderController.activeSwitch);
+
+Router.patch("/slider/activeSwitch/:_id", protect,restrictTo("admin"), sliderController.tempActiveSwitch);
+Router.delete("/slider/delete/:_id", protect,restrictTo("admin"), sliderController.tempDeleteSlider);
+
+
+
+
+
 
 
 // categories apis

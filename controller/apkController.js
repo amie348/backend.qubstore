@@ -15,6 +15,9 @@ const https = require(`https`);
 const axios = require(`axios`);
 const mongoose = require("mongoose");
 const { isValidObjectId } = require(`mongoose`);
+const {find} = require(`lodash`);
+
+
 // var public = path.join(__dirname, '../public/apk/');
 
 
@@ -389,6 +392,18 @@ exports.deleteSubcategory = catchAsync(async (req, res) => {
   res.status(200).json({ data, rmc });
 });
 
+exports.tempDeleteSubcategory = catchAsync(async (req, res) => {
+  const data = await Category.findOne({ _id: req.params._categoryId });
+  const rmc = data.subCategory.filter(d => d.name !== req.body.name);
+  console.log(req.body.name)
+  
+  
+  const result = await Category.findOneAndUpdate({ _id: req.params._categoryId }, { subCategory: rmc }, {new: true});
+  res.status(200).json({ data, result });
+});
+
+
+
 exports.addSubCategory = catchAsync(async (req, res) => {
   console.log(req.body);
   const { cate } = req.params;
@@ -405,6 +420,38 @@ exports.addSubCategory = catchAsync(async (req, res) => {
     data: allCate,
   });
 });
+
+exports.tempAddSubCategory = catchAsync(async (req, res) => {
+  
+
+  try{
+    const { _categoryId } = req.params;
+    const { slug, name } = req.body;
+    const filename = req.file.filename;
+    const newSubCate = { name, image: filename, slug: slug };
+    const category = await Category.findOne({ _id: _categoryId });
+    category.subCategory.push(newSubCate);
+    await Category.findByIdAndUpdate(category._id, {
+      subCategory: category.subCategory,
+    });
+
+    res.status(201).json({
+      message: `SubCategory Added Successfull`
+    });
+
+  }catch(error) {
+
+    console.log(error)
+
+    res.status(500).json({
+      hasError: true,
+      message: 'server error occured'
+    });
+
+  }
+
+});
+
 
 
 exports.editSubCategory = catchAsync(async (req, res) => {
@@ -1488,6 +1535,7 @@ exports.getCategory = async(req, res) => {
 
 }
 
+
 exports.getApksPaginated = async(req, res) => {
 
   try{
@@ -1527,8 +1575,6 @@ exports.getApks = async (req,res) => {
 
     
     let filters = {};
-
-    console.log(`searchFilters`, searchFilters)
 
 
     // looping through all filters to modify them according
@@ -1726,6 +1772,139 @@ exports.getApks = async (req,res) => {
 
 }
 
+exports.getAllCategories = async( req, res) => {
+
+  const category = req.params.category;
+  console.log({ category });
+  const data = await Category.find({},{slug: 1, category:1, _id:1, static: 1});
+  res.status(200).json({ data });
+
+}
+
+exports.getSubCategories = async (req,res) => {
+
+  try{
+
+    let {pageSize, pageNumber, categoryId } = req.body;
+
+    const [ startRecord, noOfRecords ] = [ parseInt(pageNumber) <= 1 ? 0 : parseInt((parseInt(pageNumber) - 1) * parseInt(pageSize)), parseInt(pageSize) <= 0 ? 1 : parseInt(pageSize)];
+
+    // crteating projection object 
+    let pipeline = [
+      {
+        '$match': {
+          '_id': new mongoose.Types.ObjectId(categoryId)
+        }
+      }, {
+        '$unwind': {
+          'path': '$subCategory'
+        }
+      }, {
+        '$project': {
+          'subCategory': 1
+        }
+      }, {
+        $facet : {
+        possibleDataDrawings: [
+          {
+            $count: 'total'
+          },
+          {
+            $project: {
+              possibleDataDrawings: {
+                $ceil: {
+                  $divide: ['$total', noOfRecords]
+                }
+              }
+            }
+          }
+          ],
+        subCategories : [
+          {
+            $skip: startRecord
+          },
+          {
+            $limit: noOfRecords
+          },{
+            $group: {
+              '_id': '$_id',
+              'subCategory': {
+                '$push': '$subCategory'
+              }
+            }
+          }
+          ],
+        totalSubCategories: [
+            {
+              '$count': 'total'
+            }
+          ]
+        }
+      }, {
+        $project: {
+          possibleDataDrawings: {
+            $arrayElemAt: [`$possibleDataDrawings`, 0]
+          },
+          totalSubCategories: {
+            '$arrayElemAt': ['$totalSubCategories', 0]
+          },
+          subCategories: {
+            '$arrayElemAt': ['$subCategories', 0]
+          },
+
+        }
+      }, 
+      {
+        $project: {
+          possibleDataDrawings: `$possibleDataDrawings.possibleDataDrawings`,
+          totalSubCategories: `$totalSubCategories.total`,
+          subCategories: `$subCategories.subCategory`
+        }
+      }
+    ]
+
+    // querying database for all franchises
+    let {possibleDataDrawings, totalSubCategories ,subCategories}  = (await Category.aggregate(pipeline).collation({ locale: `en`, strength: 2 }).exec())[0];
+
+    
+
+     if( !totalSubCategories ){
+
+      return res.status(200).json({
+        hasError: false,
+        message: `WARNING: No health quotes found in the database against requested parameters.`,
+        totalRecords: totalSubCategories,
+        currentPageRecords: subCategories.length,
+        totalPages: 0,
+        data: subCategories
+      });
+     
+    }
+
+    return res.status(200).json({
+      hasError: false,
+      message: `SUCCESS: Requested data fetched successfully.`,
+      totalRecords: totalSubCategories,
+      currentPageRecords: subCategories.length,
+      totalPages: possibleDataDrawings,
+      data: subCategories
+    });
+
+  
+  } catch(err){
+
+    console.log("error while getting specific categories apks", err)
+    res.status(500).json({
+
+      hasError: true,
+      message: "INternal server error occured"
+
+    })
+
+  }
+
+}
+
 exports.temporaryDownload = async(req, res) => {
 
   try{
@@ -1754,6 +1933,247 @@ exports.temporaryDownload = async(req, res) => {
     res.status(500).json({
       hasError: true,
       message: `Internal Server Error Occured`
+    })
+
+  }
+
+}
+
+exports.dashboardAnalytics = async(req, res) => {
+
+
+  try{
+
+    const pipeline = [
+      {
+        '$facet': {
+          'totalapks': [
+            {
+              '$group': {
+                '_id': null, 
+                'totalapks': {
+                  '$sum': 1
+                }
+              }
+            }
+          ], 
+          'categoryViseApks': [
+            {
+              '$group': {
+                '_id': '$category', 
+                'count': {
+                  '$sum': 1
+                }, 
+                'downloads': {
+                  '$sum': '$downloads'
+                }
+              }
+            }
+          ], 
+          'appsCategoryApks': [
+            {
+              '$match': {
+                'category': 'Apps'
+              }
+            }, {
+              '$group': {
+                '_id': {
+                  'category': '$category', 
+                  'subcategory': '$subCategory'
+                }, 
+                'count': {
+                  '$sum': 1
+                }, 
+                'downloads': {
+                  '$sum': '$downloads'
+                }
+              }
+            }
+          ], 
+          'gamesCategoryApks': [
+            {
+              '$match': {
+                'category': 'Games'
+              }
+            }, {
+              '$group': {
+                '_id': {
+                  'category': '$category', 
+                  'subcategory': '$subCategory'
+                }, 
+                'count': {
+                  '$sum': 1
+                }, 
+                'downloads': {
+                  '$sum': '$downloads'
+                }
+              }
+            }
+          ], 
+          'downloads': [
+            {
+              '$group': {
+                '_id': null, 
+                'downloads': {
+                  '$sum': '$downloads'
+                }
+              }
+            }
+          ]
+        }
+      }, {
+        '$project': {
+          'totalApks': {
+            '$arrayElemAt': [
+              '$totalapks', 0
+            ]
+          }, 
+          'downloads': {
+            '$arrayElemAt': [
+              '$downloads', 0
+            ]
+          }, 
+          'gamesCategoryApks': {
+            '$map': {
+              'input': '$gamesCategoryApks', 
+              'as': 'entry', 
+              'in': {
+                'subcategory': '$$entry._id.subcategory', 
+                'downloads': '$$entry.downloads', 
+                'count': '$$entry.count'
+              }
+            }
+          }, 
+          'appsCategoryApks': {
+            '$map': {
+              'input': '$appsCategoryApks', 
+              'as': 'entry', 
+              'in': {
+                'subcategory': '$$entry._id.subcategory', 
+                'downloads': '$$entry.downloads', 
+                'count': '$$entry.count'
+              }
+            }
+          }, 
+          'categoryViseApks': {
+            '$map': {
+              'input': '$categoryViseApks', 
+              'as': 'entry', 
+              'in': {
+                'category': '$$entry._id', 
+                'downloads': '$$entry.downloads', 
+                'count': '$$entry.count'
+              }
+            }
+          }
+        }
+      }, {
+        '$project': {
+          'totalApks': '$totalApks.totalapks', 
+          'downloads': '$downloads.downloads', 
+          'gamesCategoryApks': 1, 
+          'appsCategoryApks': 1, 
+          'categoryViseApks': 1
+        }
+      }, {
+        '$unionWith': {
+          'coll': 'visitors', 
+          'pipeline': [
+            {
+              '$project': {
+                'today': '$today.visitors', 
+                'monthly': '$monthly.visitors', 
+                'allVisitors': '$allVisitors'
+              }
+            }
+          ]
+        }
+      }
+    ];
+
+    const [{totalApks, downloads, gamesCategoryApks, appsCategoryApks, categoryViseApks},{today, monthly, allVisitors}] = (await Apk.aggregate(pipeline).collation({ locale: `en`, strength: 2 }).exec()) 
+
+    const categories = await Category.find({}, {category: 1, subCategory:1}).lean().exec();
+
+    const Apps = await find(categories, {category: `Apps`});
+    const Games = await find(categories, {category: `Games`});
+
+
+    await categories.forEach( async ({category}) => {
+
+      let hasCategory = await find(categoryViseApks, {category})
+      
+
+      if(!hasCategory) {
+
+        categoryViseApks.push({
+          category,
+          downloads: 0,
+          count: 0
+        })
+
+      }
+      
+    })
+
+    await Apps.subCategory.forEach( async ({name}) => {
+
+      
+
+      let hasSubCategory = await find(appsCategoryApks, {subcategory: name})
+      
+
+      if(!hasSubCategory) {
+
+        appsCategoryApks.push({
+          subcategory: name,
+          downloads: 0,
+          count: 0
+        })
+
+      }
+      
+    })
+
+
+    await Games.subCategory.forEach( async ({name}) => {
+
+      let hasSubCategory = await find(gamesCategoryApks, {subcategory: name})
+      
+
+      if(!hasSubCategory) {
+
+        gamesCategoryApks.push({
+          subcategory: name,
+          downloads: 0,
+          count: 0
+        })
+
+      }
+      
+    })
+    
+
+    return res.status(200).json({
+
+      hasError: false,
+      totalApks, 
+      downloads, 
+      gamesCategoryApks, 
+      appsCategoryApks, 
+      categoryViseApks,
+      today, 
+      monthly, 
+      allVisitors
+
+    })
+
+  }catch (error) {
+
+    console.log(error)
+
+    res.status(500).json({
+      message: "internal server error occured"
     })
 
   }
@@ -1869,5 +2289,3 @@ exports.temporaryDownload = async(req, res) => {
   
 
 // }
-
-

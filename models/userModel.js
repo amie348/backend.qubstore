@@ -92,7 +92,7 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
-    select: false,
+    select: true,
   },
   account: {
     type: String,
@@ -182,12 +182,13 @@ userSchema.methods.createDownloadLinkToken = function () {
 };
 
 // referencing users
-userSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: "users",
-    select: "firstName  email",
-  });
-  next();
-});
+// userSchema.pre(/^find/, function (next) {
+//   this.populate({
+//     path: "users",
+//     select: "firstName  email",
+//   });
+//   next();
+// });
+
 const User = mongoose.model("User", userSchema);
 module.exports = User;
